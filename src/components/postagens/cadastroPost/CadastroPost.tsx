@@ -1,21 +1,43 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
-import { Container, Typography, TextField, Button, Select, InputLabel, MenuItem, FormControl, FormHelperText } from "@material-ui/core"
-import './CadastroPost.css';
-import {useNavigate, useParams } from 'react-router-dom'
-import Tema from '../../../models/Tema';
-import useLocalStorage from 'react-use-localstorage';
+import { Button, Container, FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField, Typography } from "@material-ui/core";
+import { ChangeEvent, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 import Postagem from '../../../models/Postagem';
+import Tema from '../../../models/Tema';
+import User from "../../../models/User";
 import { busca, buscaId, post, put } from '../../../services/Service';
+import { UserState } from '../../../store/token/Reducer';
+import './CadastroPost.css';
+import { toast } from "react-toastify";
+import { addToken } from "../../../store/token/Actions";
 
 function CadastroPost() {
     let navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const [temas, setTemas] = useState<Tema[]>([])
-    const [token, setToken] = useLocalStorage('token');
+    
+    const dispatch = useDispatch()
+
+    const token = useSelector<UserState, UserState["tokens"]>(
+        (state) => state.tokens
+    )
+
+    const userId = useSelector<UserState, UserState["id"]>(
+        (state) => state.id
+    )
 
     useEffect(() => {
-        if (token == "") {
-            alert("Você precisa estar logado")
+        if (token === "") {
+            toast.error('Usuário não autenticado!', {
+                position: 'top-right',
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+                theme: 'colored',
+                progress: undefined,
+            });
             navigate("/login")
 
         }
@@ -26,17 +48,29 @@ function CadastroPost() {
             id: 0,
             descricao: ''
         })
+
+    const [user, setUser] = useState<User>({
+        id: + userId,
+        nome: '',
+        usuario: '',
+        senha: '',
+        foto: ''
+    })
+
     const [postagem, setPostagem] = useState<Postagem>({
         id: 0,
         titulo: '',
         texto: '',
-        tema: null
+        data: '',
+        tema: null,
+        usuario: null
     })
 
-    useEffect(() => { 
+    useEffect(() => {
         setPostagem({
             ...postagem,
-            tema: tema
+            tema: tema,
+            usuario: user,
         })
     }, [tema])
 
@@ -48,11 +82,17 @@ function CadastroPost() {
     }, [id])
 
     async function getTemas() {
-        await busca('/temas', setTemas, {
-            headers: {
-                'Authorization': token
+        try {
+            await busca('/temas', setTemas, {
+                headers: {
+                    'Authorization': token
+                }
+            })
+        } catch (error: any) {
+            if (error.response?.status === 403) {
+                dispatch(addToken(''))
             }
-        })
+        }
     }
 
     async function findByIdPostagem(id: string) {
@@ -77,19 +117,71 @@ function CadastroPost() {
         e.preventDefault()
 
         if (id !== undefined) {
-            put(`/postagens`, postagem, setPostagem, {
-                headers: {
-                    'Authorization': token
+            try {
+                await put(`/postagens`, postagem, setPostagem, {
+                    headers: {
+                        'Authorization': token
+                    }
+                })
+                toast.success('Postagem atualizada com sucesso', {
+                    position: 'top-right',
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    theme: 'colored',
+                    progress: undefined,
+                });
+            } catch (error: any) {
+                if (error.response?.status === 403) {
+                    dispatch(addToken(''))
+                } else {
+                    toast.error("Erro ao Atualizar Postagem", {
+                        position: 'top-right',
+                        autoClose: 2000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        theme: 'colored',
+                        progress: undefined,
+                    });
                 }
-            })
-            alert('Postagem atualizada com sucesso');
+            }
         } else {
-            post(`/postagens`, postagem, setPostagem, {
-                headers: {
-                    'Authorization': token
+            try {
+                await post(`/postagens`, postagem, setPostagem, {
+                    headers: {
+                        'Authorization': token
+                    }
+                })
+                toast.success('Postagem cadastrada com sucesso', {
+                    position: 'top-right',
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: false,
+                    theme: 'colored',
+                    progress: undefined,
+                });
+            } catch (error: any) {
+                if (error.response?.status === 403) {
+                    dispatch(addToken(''))
+                } else {
+                    toast.error("Erro ao Cadastrar Postagem", {
+                        position: 'top-right',
+                        autoClose: 2000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: false,
+                        theme: 'colored',
+                        progress: undefined,
+                    });
                 }
-            })
-            alert('Postagem cadastrada com sucesso');
+            }
         }
         back()
 
@@ -115,24 +207,23 @@ function CadastroPost() {
                             headers: {
                                 'Authorization': token
                             }
-                        })}>
+                        })}
+                    >
                         {
                             temas.map(tema => (
-                                <MenuItem value={tema.id}>{tema.descricao}</MenuItem>
+                                <MenuItem value={tema.id} >{tema.descricao}</MenuItem>
                             ))
                         }
                     </Select>
                     <FormHelperText>Escolha um tema para a postagem</FormHelperText>
-                    <Button type="submit" variant="contained" color="primary">
-                        Finalizar
+                    <Button type="submit" variant="contained" color="primary"
+                        disabled={postagem.titulo.length == 0 || postagem.texto.length == 0 || postagem.tema?.id == 0}
+                    >
+                        {postagem.id ? 'Atualizar' : 'Cadastrar'}
                     </Button>
                 </FormControl>
             </form>
         </Container>
     )
 }
-
 export default CadastroPost;
-
-//setTema guardar o estado utual do userstate tema , set tema ele retorna
- //async função assincrona, vai seguinfo espera o retorna da promisses
