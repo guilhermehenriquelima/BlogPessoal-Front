@@ -1,4 +1,4 @@
-import { Box, Button} from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
@@ -94,9 +94,7 @@ function Perfil() {
                 </Box>
 
                 <p className='card-container-texto'>
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Numquam accusantium totam incidunt architecto maiores, perferendis eius. Tempora ullam magni dolore voluptatibus, quidem sunt tempore distinctio ut aliquam modi aliquid officiis.
-                    Assumenda voluptatibus, animi pariatur voluptatum magnam ullam aspernatur optio suscipit incidunt dolor modi quos aperiam. Quam possimus rerum iste nobis quas porro unde sequi, sed nisi labore est voluptas corrupti.
-                    Deleniti officiis sint perspiciatis nisi iste, voluptate sunt asperiores dolor sapiente non corporis omnis voluptatem soluta. Nulla odio alias aperiam, magnam eaque assumenda tempora! Inventore odit iure unde placeat iste.
+                    Desde que me interessei na área da programação, estudo diariamente para conseguir a minha primeira oportunidade como Desenvolvedor. Há 4 meses venho desenvolvendo projetos para colocar em prática todo o meu conhecimento. Participei de um bootcamp de 3 meses pela Generation Brasil, onde adquirir experiência nas linguagens Java e JavaScript, atuando tanto no Front-End, implementando React e TypeScript quanto no Back-End de projetos utilizando o Spring.
                 </p>
 
             </Box>

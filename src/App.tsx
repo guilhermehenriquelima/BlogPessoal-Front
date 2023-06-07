@@ -16,6 +16,7 @@ import Perfil from './paginas/perfil/Perfil';
 import store from './store/Store';
 
 import 'react-toastify/dist/ReactToastify.css';
+import ListaPostagemPorTitulo from './components/postagens/listapostagemportitulo/ListaPostagemPorTitulo';
 
 function App() {
 
@@ -40,6 +41,7 @@ function App() {
             <Route path="/deletarPostagem/:id" element={<DeletarPostagem />} />
             <Route path="/deletarTema/:id" element={<DeletarTema />} />
             <Route path="/perfil" element={<Perfil />} />
+            <Route path="/postagensportitulo" element={<ListaPostagemPorTitulo />} />
           </Routes>
         </div>
         <Footer />
